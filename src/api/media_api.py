@@ -5,6 +5,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Qu
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import async_local_session
+from services import (
+    add_like_service,
+    create_post_service,
+    get_post_service,
+    get_top_posts_service,
+)
 
 router = APIRouter(prefix="/api/v1")
 
@@ -118,7 +124,12 @@ async def get_session() -> AsyncGenerator[AsyncSession]:
     "/posts/",
     summary="make your post",
 )
-async def make_post(session: AsyncSession = Depends(get_session)) -> None: ...
+async def make_post(
+    post_id: uuid.UUID,
+    text: str | None = None,
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    await create_post_service(session, post_id, text)
 
 
 @router.get(
@@ -128,7 +139,8 @@ async def make_post(session: AsyncSession = Depends(get_session)) -> None: ...
 async def get_post(
     post_id: uuid.UUID = Path(),
     session: AsyncSession = Depends(get_session),
-) -> None: ...
+) -> None:
+    await get_post_service(session, post_id)
 
 
 @router.post(
@@ -138,7 +150,8 @@ async def get_post(
 async def give_like(
     post_id: uuid.UUID = Path(),
     session: AsyncSession = Depends(get_session),
-) -> None: ...
+) -> None:
+    await add_like_service(session, post_id, post_id)
 
 
 @router.get(
