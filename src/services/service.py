@@ -3,7 +3,7 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database.database_classes import DataBaseCRUD
+from database import DataBaseCRUD
 
 
 async def create_post_service(
@@ -24,6 +24,11 @@ async def add_like_service(
     session: AsyncSession, post_id: uuid.UUID, user_id: int
 ) -> typing.Any:
     try:
+        can_like = await DataBaseCRUD.can_like(session, post_id, user_id)
+
+        if not can_like:
+            return {"status": "error"}
+
         await DataBaseCRUD.add_like(session, post_id, user_id)
         await session.commit()
         return {"status": "ok"}

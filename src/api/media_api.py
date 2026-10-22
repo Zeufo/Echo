@@ -125,11 +125,11 @@ async def get_session() -> AsyncGenerator[AsyncSession]:
     summary="make your post",
 )
 async def make_post(
-    post_id: uuid.UUID,
     text: str | None = None,
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    await create_post_service(session, post_id, text)
+    post_id = uuid.uuid4()
+    return await create_post_service(session, post_id, text)
 
 
 @router.get(
@@ -140,7 +140,7 @@ async def get_post(
     post_id: uuid.UUID = Path(),
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    await get_post_service(session, post_id)
+    return await get_post_service(session, post_id)
 
 
 @router.post(
@@ -148,14 +148,16 @@ async def get_post(
     summary="add your like to a post",
 )
 async def give_like(
+    user_id: int,
     post_id: uuid.UUID = Path(),
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    await add_like_service(session, post_id, post_id)
+    return await add_like_service(session, post_id, user_id)
 
 
 @router.get(
     "/feed/top",
     summary="get 10 popular posts",
 )
-async def get_top_post(session: AsyncSession = Depends(get_session)) -> None: ...
+async def get_top_post(session: AsyncSession = Depends(get_session)) -> None:
+    return await get_top_posts_service(session)

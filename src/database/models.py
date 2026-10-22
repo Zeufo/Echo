@@ -1,8 +1,10 @@
 import os
 import uuid
 from datetime import date, datetime, time
+from pathlib import Path
 
 from dotenv import load_dotenv
+from loguru import logger
 from sqlalchemy import (
     UUID,
     CheckConstraint,
@@ -10,6 +12,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    PrimaryKeyConstraint,
     String,
     Time,
     create_engine,
@@ -23,7 +26,12 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-load_dotenv()
+CURRENT_FILE_PATH = Path(__file__).resolve()
+SRC_DIR = next(p for p in CURRENT_FILE_PATH.parents if p.name == "src")
+DOTENV_PATH = SRC_DIR.parent / ".env"
+
+
+load_dotenv(dotenv_path=DOTENV_PATH)
 
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "secret")
@@ -53,9 +61,7 @@ class Posts(Base):
 class Likes(Base):
     __tablename__ = "post_likes"
     post_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
         ForeignKey("posts.id", ondelete="CASCADE"),
         primary_key=True,
-        default=uuid.uuid4,
     )
     user_id: Mapped[int] = mapped_column(primary_key=True)
