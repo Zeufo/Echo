@@ -25,6 +25,7 @@ class DataBaseCRUD:
 
     @staticmethod
     async def add_like(session: AsyncSession, post_id: uuid.UUID, user_id: int) -> None:
+        session.add(Likes(post_id=post_id, user_id=user_id))
         stmt = (
             update(Posts)
             .where(Posts.id == post_id)
@@ -36,14 +37,21 @@ class DataBaseCRUD:
     @staticmethod
     async def get_top(session: AsyncSession, limit: int = 20) -> typing.Sequence[Posts]:
         stmt = select(Posts).order_by(Posts.likes_count.desc()).limit(limit)
+
         result = await session.execute(stmt)
+
         return result.scalars().all()
 
     @staticmethod
     async def can_like(session: AsyncSession, post_id: uuid.UUID, user_id: int) -> bool:
         stmt = select(Likes).where(Likes.post_id == post_id, Likes.user_id == user_id)
         result = await session.execute(stmt)
+        logger.debug(f"result is {result}")
 
-        if result:
-            return True
-        return False
+        return result.scalar() is None
+
+    @staticmethod
+    async def get_all_post_ids(session: AsyncSession, limit: int = 5000) -> list[uuid.UUID]:
+        stmt = select(Posts.id).limit(limit)
+        result = await session.execute(stmt)
+        return list(result.scalars().all())

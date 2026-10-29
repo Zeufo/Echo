@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import async_local_session
 from services import (
+    AlreadyLikedError,
+    PostNotFoundError,
     add_like_service,
     create_post_service,
     get_post_service,
@@ -140,7 +142,10 @@ async def get_post(
     post_id: uuid.UUID = Path(),
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    return await get_post_service(session, post_id)
+    try:
+        return await get_post_service(session, post_id)
+    except PostNotFoundError:
+        raise HTTPException(status_code=404, detail="Post not found")
 
 
 @router.post(
@@ -152,7 +157,10 @@ async def give_like(
     post_id: uuid.UUID = Path(),
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    return await add_like_service(session, post_id, user_id)
+    try:
+        return await add_like_service(session, post_id, user_id)
+    except AlreadyLikedError:
+        raise HTTPException(status_code=409, detail="You already liked this post")
 
 
 @router.get(

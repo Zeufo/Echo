@@ -1,9 +1,17 @@
 import typing
 import uuid
 
+from loguru import logger
+from sqlalchemy import exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import DataBaseCRUD
+
+
+class PostNotFoundError(Exception): ...
+
+
+class AlreadyLikedError(Exception): ...
 
 
 async def create_post_service(
@@ -16,7 +24,7 @@ async def create_post_service(
 async def get_post_service(session: AsyncSession, post_id: uuid.UUID) -> typing.Any:
     post = await DataBaseCRUD.get_post(session, post_id)
     if not post:
-        return None
+        raise PostNotFoundError()
     return {"id": str(post.id), "text": post.text, "likes_count": post.likes_count}
 
 
@@ -25,16 +33,18 @@ async def add_like_service(
 ) -> typing.Any:
     try:
         can_like = await DataBaseCRUD.can_like(session, post_id, user_id)
+        logger.debug(f"can_like: {can_like}")
 
         if not can_like:
-            return {"status": "error"}
+            raise AlreadyLikedError()
 
         await DataBaseCRUD.add_like(session, post_id, user_id)
         await session.commit()
         return {"status": "ok"}
+    except AlreadyLikedError:
+        raise
     except Exception:
         await session.rollback()
-        return {"status": "error"}
 
 
 async def get_top_posts_service(session: AsyncSession, limit: int = 20) -> typing.Any:
