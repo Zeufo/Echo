@@ -5,7 +5,40 @@ build/
 dist/
 wheels/
 *.egg-info
+.python-version
 
 # Virtual environments
-.venv
+.venv/
+
+# Environment / secrets
 .env
+.env.*
+.env.docker
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Databases / sessions
+*.db
+*.sqlite
+*.sqlite3
+*.session
+*.session-journal
+src/database/temp_copy.db
+
+# Cache / temp
+cache/
+*.tmp
+
+# Docker
+*.pid
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
