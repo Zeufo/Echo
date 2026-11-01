@@ -1,5 +1,6 @@
 import os
 import uuid
+from contextlib import asynccontextmanager
 from datetime import date, datetime, time
 from pathlib import Path
 
@@ -40,7 +41,7 @@ DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "my_database")
 
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
+REDIS_URL = "redis://localhost:6379/0"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 async_local_session = async_sessionmaker(engine, expire_on_commit=False)

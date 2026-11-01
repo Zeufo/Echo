@@ -51,7 +51,7 @@ class HighLoadUser(HttpUser):
         return str(uuid.uuid4())
 
     # 70
-    @task(0)
+    @task(70)
     def get_post(self):
         """
         70% нагрузки: Чтение поста по ID.
@@ -60,7 +60,7 @@ class HighLoadUser(HttpUser):
         self.client.get(f"/api/v1/posts/{post_id}", name="/api/v1/posts/[id]")
 
     # 15
-    @task(100)
+    @task(15)
     def give_like(self):
         """
         15% нагрузки: Постановка лайка на пост.
@@ -73,7 +73,7 @@ class HighLoadUser(HttpUser):
         )
 
     # 10
-    @task(0)
+    @task(10)
     def get_feed_top(self):
         """
         10% нагрузки: Запрос топа популярных постов.
@@ -81,7 +81,7 @@ class HighLoadUser(HttpUser):
         self.client.get("/api/v1/feed/top", name="/api/v1/feed/top")
 
     # 5
-    @task(0)
+    @task(5)
     def create_post(self):
         """
         5% нагрузки: Создание нового поста и сохранение его ID.
