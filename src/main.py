@@ -1,10 +1,10 @@
 from contextlib import asynccontextmanager
 
-import redis
 import redis.asyncio as aioredis
 from fastapi import FastAPI
 
 from api import media_router
+from broker import connect_rabbit, declare_likes_queue
 from core import setup_logger
 from database import REDIS_URL
 
@@ -16,8 +16,17 @@ async def lifespan(app: FastAPI):
         REDIS_URL, decode_responses=True, max_connections=50
     )
 
+    rabbit = await connect_rabbit()
+    channel = await rabbit.channel()
+    await declare_likes_queue(channel)
+
     app.state.redis = redis_client
+    app.state.rabbit = rabbit
+    app.state.rabbit_channel = channel
+
     yield
+
+    await app.state.rabbit.close()
     await app.state.redis.close()
 
 

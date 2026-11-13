@@ -41,9 +41,11 @@ DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "my_database")
 
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-REDIS_URL = "redis://localhost:6379/0"
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+SQL_ECHO = os.getenv("SQL_ECHO", "0") == "1"
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, echo=SQL_ECHO)
 async_local_session = async_sessionmaker(engine, expire_on_commit=False)
 
 

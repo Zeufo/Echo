@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+
+# VCS / IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Секреты и локальные env
+.env
+.env.*
+!.env.example
+
+# Данные и артефакты, не нужные в образе
+logs/
+img/
+*.db
+*.sqlite*
+*.session
+posts_uuids.json
+locustfile.py
+src/locustfile.py
+
+# Docker-служебное
+Dockerfile
+docker-compose.yml
+.dockerignore

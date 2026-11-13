@@ -1,7 +1,9 @@
+import typing
 import uuid
 from collections.abc import AsyncGenerator
 
 import redis.asyncio as aioredis
+from aio_pika.abc import AbstractChannel
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -10,9 +12,11 @@ from fastapi import (
     Path,
     Query,
     Request,
+    status,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from broker import publish_like
 from database import async_local_session
 from services import (
     AlreadyLikedError,
@@ -29,6 +33,10 @@ router = APIRouter(prefix="/api/v1")
 async def get_session() -> AsyncGenerator[AsyncSession]:
     async with async_local_session() as session:
         yield session
+
+
+async def get_rabbit_channel(request: Request) -> AbstractChannel:
+    return request.app.state.rabbit_channel
 
 
 async def get_redis_session(request: Request) -> aioredis.Redis:
@@ -66,17 +74,15 @@ async def get_post(
 @router.post(
     "/posts/{post_id}/like",
     summary="add your like to a post",
+    status_code=status.HTTP_201_CREATED,
 )
 async def give_like(
     user_id: int,
     post_id: uuid.UUID = Path(),
-    session: AsyncSession = Depends(get_session),
-    redis: aioredis.Redis = Depends(get_redis_session),
-) -> None:
-    try:
-        return await add_like_service(redis, session, post_id, user_id)
-    except AlreadyLikedError:
-        raise HTTPException(status_code=409, detail="You already liked this post")
+    rabbit: AbstractChannel = Depends(get_rabbit_channel),
+) -> typing.Any:
+    await publish_like(rabbit, post_id, user_id)
+    return {"status": "accepted"}
 
 
 @router.get(
