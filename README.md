@@ -99,6 +99,12 @@ Three extra consumer processes cost ~12% of throughput; one extra API process ad
 consumers changed nothing. On a single machine everything competes for the same cores, so *how many
 processes of which service* you run matters as much as the choice of technology.
 
+<img width="1800" height="660" alt="likes_storm_200users" src="https://github.com/user-attachments/assets/68090301-088b-4a1c-825d-86dd8121ccac" />
+
+<img width="1950" height="720" alt="p95_vs_users" src="https://github.com/user-attachments/assets/0a0cf223-e2a5-4ad0-b280-d9a60c8be6e6" />
+
+<img width="1950" height="720" alt="rps_vs_users" src="https://github.com/user-attachments/assets/5d792c65-e237-4cb4-9d00-86857923a4b0" />
+
 ## What I take away
 
 1. **For a small prototype, plain FastAPI + PostgreSQL is enough.** The baseline served ~200 RPS of
